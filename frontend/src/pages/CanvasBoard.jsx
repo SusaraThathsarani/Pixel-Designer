@@ -31,6 +31,7 @@ const CanvasBoard = () => {
   const [selectedTool, setSelectedTool] = useState("pencil");
   const [currentColor, setCurrentColor] = useState("#000000");
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [mode, setMode] = useState("static"); // 'static' | 'animations'
   const [framesCount, setFramesCount] = useState(0);
@@ -140,8 +141,26 @@ const CanvasBoard = () => {
   // Shortcuts
   useEffect(() => {
     const handler = (e) => {
+      const tag = (e.target && e.target.tagName) || "";
+      const isTypingTarget =
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        e.target?.isContentEditable;
+
       const key = e.key.toLowerCase();
       const ctrlOrCmd = e.ctrlKey || e.metaKey;
+
+      if (!ctrlOrCmd && !isTypingTarget) {
+        if (key === "?" || (key === "/" && e.shiftKey)) {
+          e.preventDefault();
+          setShowShortcutsHelp((prev) => !prev);
+          return;
+        }
+        if (key === "escape") {
+          setShowShortcutsHelp(false);
+        }
+      }
+
       if (!ctrlOrCmd) return;
 
       if (key === "z" && !e.shiftKey) {
@@ -943,6 +962,52 @@ const CanvasBoard = () => {
           </div>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setShowShortcutsHelp((prev) => !prev)}
+        className="fixed bottom-4 left-4 z-30 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg hover:bg-blue-700"
+        aria-label="Toggle keyboard shortcuts help"
+      >
+        Shortcuts
+      </button>
+
+      {showShortcutsHelp && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-2xl">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900">Keyboard shortcuts</h2>
+              <button
+                type="button"
+                onClick={() => setShowShortcutsHelp(false)}
+                className="rounded-md px-2 py-1 text-sm text-gray-600 hover:bg-gray-100"
+                aria-label="Close shortcuts help"
+              >
+                Esc
+              </button>
+            </div>
+
+            <ul className="space-y-2 text-sm text-gray-800">
+              <li className="flex justify-between border-b border-gray-100 pb-1">
+                <span>Undo</span>
+                <span className="font-semibold">Ctrl/Cmd + Z</span>
+              </li>
+              <li className="flex justify-between border-b border-gray-100 pb-1">
+                <span>Redo</span>
+                <span className="font-semibold">Ctrl/Cmd + Y or Shift + Ctrl/Cmd + Z</span>
+              </li>
+              <li className="flex justify-between border-b border-gray-100 pb-1">
+                <span>Toggle this panel</span>
+                <span className="font-semibold">?</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Close this panel</span>
+                <span className="font-semibold">Esc</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Toast */}
       {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg("")} />}
