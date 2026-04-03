@@ -140,7 +140,7 @@ const LoginFormCard = () => {
                 type="submit"
                 data-testid="login-submit"
               >
-                {loading ? "Logging in…" : "Log in"}
+                {loading ? "Logging in…" : "Sign in"}
               </BlueButton>
             </form>
 
